@@ -8,5 +8,5 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region != "" ? var.aws_region : (env.AWS_DEFAULT_REGION)
+  region = var.aws_region 
 }
