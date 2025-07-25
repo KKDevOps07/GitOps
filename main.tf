@@ -148,7 +148,6 @@ resource "aws_instance" "master" {
   private_ip                  = "192.168.1.5"
   vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
-  user_data                   = file("${path.module}/kub.sh")
   tags = {
     Name = "master-node"
   }
@@ -164,7 +163,6 @@ resource "aws_instance" "slave" {
   private_ip                  = "192.168.2.${count.index + 5}"
   vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
-  user_data                   = file("${path.module}/kub.sh")
   tags = {
     Name = "slave-node-${count.index + 1}"
   }
