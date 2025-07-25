@@ -1,8 +1,4 @@
 # ==========================
-# Variable Declarations
-# ==========================
-
-# ==========================
 # VPC Configuration
 # ==========================
 resource "aws_vpc" "main" {
@@ -69,138 +65,6 @@ resource "aws_route_table_association" "a" {
 resource "aws_route_table_association" "b" {
   subnet_id      = aws_subnet.subnet_b.id
   route_table_id = aws_route_table.public.id
-}
-
-# ==========================
-# Security Group (Allow all HTTP/HTTPS/SSH)
-# ==========================
-resource "aws_security_group" "demo" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-   
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "demo-sg"
-  }
-}
-
-# ==========================
-# ALB Security Group
-# ==========================
-resource "aws_security_group" "alb_sg" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "alb-sg"
-  }
-}
-
-# ==========================
-# Kubernetes Cluster Security Group
-# ==========================
-resource "aws_security_group" "k8s_cluster_sg" {
-  vpc_id = aws_vpc.main.id
-
-  # Allow all traffic within the security group (for cluster communication)
-  ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    self            = true
-  }
-
-  # Allow Kubernetes API server access (default 6443)
-  ingress {
-    from_port   = 6443
-    to_port     = 6443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow SSH access
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "k8s-cluster-sg"
-  }
-}
-
-# ==========================
-# Redis Security Group
-# ==========================
-resource "aws_security_group" "redis_sg" {
-  vpc_id = aws_vpc.main.id
-
-  # Allow Redis port (6379) from within the VPC
-  ingress {
-    from_port   = 6379
-    to_port     = 6379
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.main.cidr_block]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "redis-sg"
-  }
 }
 
 # ==========================
@@ -276,31 +140,31 @@ resource "aws_lb_listener" "app_lb_listener" {
 # EC2 Instances
 # ==========================
 resource "aws_instance" "master" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  availability_zone      = var.availability_zone_a
-  key_name               = var.private_key_path
-  subnet_id              = aws_subnet.subnet_a.id
-  private_ip             = "192.168.1.5" # Use a valid, non-reserved IP in subnet_a
-  vpc_security_group_ids = [aws_security_group.demo.id]
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  availability_zone           = var.availability_zone_a
+  key_name                    = var.private_key_path
+  subnet_id                   = aws_subnet.subnet_a.id
+  private_ip                  = "192.168.1.5"
+  vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
-  user_data              = file("${path.module}/kub.sh")
+  user_data                   = file("${path.module}/kub.sh")
   tags = {
     Name = "master-node"
   }
 }
 
 resource "aws_instance" "slave" {
-  count                  = 3
-  ami                    = var.ami_id
-  instance_type          = "t2.micro"
-  key_name               = var.private_key_path
-  availability_zone      = var.availability_zone_b
-  subnet_id              = aws_subnet.subnet_b.id
-  private_ip             = "192.168.2.${count.index + 5}" # Use valid, non-reserved IPs in subnet_b
-  vpc_security_group_ids = [aws_security_group.demo.id]
+  count                       = 3
+  ami                         = var.ami_id
+  instance_type               = "t2.micro"
+  key_name                    = var.private_key_path
+  availability_zone           = var.availability_zone_b
+  subnet_id                   = aws_subnet.subnet_b.id
+  private_ip                  = "192.168.2.${count.index + 5}"
+  vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
-  user_data              = file("${path.module}/kub.sh")
+  user_data                   = file("${path.module}/kub.sh")
   tags = {
     Name = "slave-node-${count.index + 1}"
   }
