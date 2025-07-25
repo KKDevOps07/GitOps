@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         TF_IN_AUTOMATION       = "true"
-        AWS_ACCESS_KEY_ID      = credentials('aws_access_key')
-        AWS_SECRET_ACCESS_KEY  = credentials('aws_secret_key')
+        TF_VAR_aws_access_key  = credentials('aws_access_key')    // Jenkins credentials
+        TF_VAR_aws_secret_key  = credentials('aws_secret_key')    // Jenkins credentials
         AWS_DEFAULT_REGION     = "us-east-1"
     }
 
@@ -23,7 +23,7 @@ pipeline {
 
         stage('Terraform Fmt') {
             steps {
-                sh 'terraform fmt'
+                sh 'terraform fmt -check'
             }
         }
 
@@ -41,7 +41,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -auto-approve'
+                sh 'terraform apply -auto-approve tfplan'
             }
         }
     }
