@@ -15,19 +15,6 @@ pipeline {
             }
         }
 
-        // ...existing code...
-        stage('Terraform Fmt') {
-            steps {
-                sh 'terraform fmt'
-            }
-        }
-
-        stage('Terraform Validate') {
-            steps {
-                sh 'terraform validate'
-            }
-        }
-
         stage('Install Terrascan') {
             steps {
                 sh 'wget https://github.com/tenable/terrascan/releases/latest/download/terrascan_windows_amd64.zip -O terrascan.zip'
@@ -55,12 +42,25 @@ pipeline {
                 }
             }
         }
+        
         stage('Terraform Init') {
             steps {
                 sh 'terraform init'
             }
         }
         
+        stage('Terraform Fmt') {
+            steps {
+                sh 'terraform fmt'
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                sh 'terraform validate'
+            }
+        }
+
         stage('Terraform Plan') {
             steps {
                 sh 'terraform plan -out=tfplan'
