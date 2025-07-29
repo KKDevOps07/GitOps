@@ -11,8 +11,8 @@ pipeline {
 
     environment {
         TF_IN_AUTOMATION       = "true"
-        TF_VAR_aws_access_key  = credentials('aws_access_key')    // Jenkins credentials
-        TF_VAR_aws_secret_key  = credentials('aws_secret_key')    // Jenkins credentials
+        TF_VAR_aws_access_key  = credentials('aws_access_key')    
+        TF_VAR_aws_secret_key  = credentials('aws_secret_key')    
         AWS_DEFAULT_REGION     = "us-east-1"
     }
 
@@ -34,7 +34,7 @@ pipeline {
         stage('Terraform Fmt') {
             steps {
                 dir('terraform') {
-                    sh 'terraform fmt -recursive'
+                    sh 'terraform fmt -recursive || true'
                 }
             }
         }
@@ -48,6 +48,7 @@ pipeline {
         }
 
         stage('Terraform Plan') {
+            when { expression { params.ACTION == 'apply' } }
             steps {
                 dir('terraform') {
                     sh 'terraform plan -out=tfplan'
@@ -58,7 +59,13 @@ pipeline {
         stage('Terraform Apply/Destroy') {
             steps {
                 dir('terraform') {
-                    sh "terraform ${params.ACTION} -auto-approve"
+                    script {
+                        if (params.ACTION == 'apply') {
+                            sh 'terraform apply -auto-approve tfplan'
+                        } else {
+                            sh 'terraform destroy -auto-approve'
+                        }
+                    }
                 }
             }
         }
@@ -70,3 +77,5 @@ pipeline {
         }
     }
 }
+// Jenkinsfile for Terraform GitOps Pipeline
+// This Jenkinsfile defines a pipeline for managing Terraform infrastructure as code.
