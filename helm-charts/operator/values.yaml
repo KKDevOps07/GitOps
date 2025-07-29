@@ -1,0 +1,86 @@
+# Default values for minio-operator.
+
+operator:
+  ## Setup environment variables for the Operator
+  env:
+    - name: MINIO_OPERATOR_RUNTIME
+      value: "MINIKUBE"
+  #   - name: CLUSTER_DOMAIN
+  #     value: "cluster.domain"
+  #   - name: WATCHED_NAMESPACE
+  #     value: ""
+  image:
+    repository: quay.io/minio/operator
+    tag: v5.0.6
+    pullPolicy: IfNotPresent
+  imagePullSecrets: [ ]
+  runtimeClassName: ~
+  initContainers: [ ]
+  replicaCount: 1
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
+  containerSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+  nodeSelector: { }
+  priorityClassName: ""
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: name
+                operator: In
+                values:
+                  - minio-operator
+          topologyKey: kubernetes.io/hostname
+  tolerations: [ ]
+  topologySpreadConstraints: [ ]
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+      ephemeral-storage: 500Mi
+
+console:
+  service: 
+    type: NodePort
+    nodePort: 30010
+    port: 9000
+    targetPort: 9000
+    name: console
+  ## Setup environment variables for the Console
+  image:
+    repository: quay.io/minio/operator
+    tag: v5.0.6
+    pullPolicy: IfNotPresent
+  imagePullSecrets: [ ]
+  runtimeClassName: ~
+  initContainers: [ ]
+  replicaCount: 1
+  nodeSelector: { }
+  affinity: { }
+  tolerations: [ ]
+  topologySpreadConstraints: [ ]
+  resources: { }
+  securityContext:
+    runAsUser: 1000
+    runAsNonRoot: true
+  containerSecurityContext:
+    runAsUser: 1000
+    runAsNonRoot: true
+  ingress:
+    enabled: false
+    ingressClassName: ""
+    labels: { }
+    annotations: { }
+    tls: [ ]
+    host: console.local
+    path: /
+    pathType: Prefix
+  volumes: [ ]
+  volumeMounts: [ ]
