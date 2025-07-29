@@ -11,6 +11,8 @@ pipeline {
 
     environment {
         TF_IN_AUTOMATION       = "true"
+        TF_VAR_aws_access_key  = credentials('aws_access_key')    // Jenkins credentials
+        TF_VAR_aws_secret_key  = credentials('aws_secret_key')    // Jenkins credentials
         AWS_DEFAULT_REGION     = "us-east-1"
     }
 
