@@ -142,28 +142,51 @@ resource "aws_lb_listener" "app_lb_listener" {
 resource "aws_instance" "master" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
-  availability_zone           = var.availability_zone_a
-  key_name                    = var.private_key_path
   subnet_id                   = aws_subnet.subnet_a.id
   private_ip                  = "192.168.1.5"
+  key_name                    = var.private_key_path
   vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
-  tags = {
-    Name = "master-node"
+
+  provisioner "file" {
+    source      = "kube_cluster.sh"
+    destination = "/home/ubuntu/kube_cluster.sh"
   }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/ubuntu/kube_cluster.sh",
+      "sudo MASTER_PRIVATE_IP=192.168.1.5 bash /home/ubuntu/kube_cluster.sh"
+    ]
+  }
+
+  tags = { Name = "master-node" }
 }
 
 resource "aws_instance" "slave" {
   count                       = 3
   ami                         = var.ami_id
   instance_type               = "t2.micro"
-  key_name                    = var.private_key_path
-  availability_zone           = var.availability_zone_b
   subnet_id                   = aws_subnet.subnet_b.id
   private_ip                  = "192.168.2.${count.index + 5}"
+  key_name                    = var.private_key_path
   vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
-  tags = {
-    Name = "slave-node-${count.index + 1}"
+
+  provisioner "file" {
+    source      = "kube_cluster.sh"
+    destination = "/home/ubuntu/kube_cluster.sh"
   }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/ubuntu/kube_cluster.sh",
+      "sudo MASTER_PRIVATE_IP=192.168.1.5 bash /home/ubuntu/kube_cluster.sh"
+    ]
+  }
+
+  depends_on = [aws_instance.master]
+  tags = { Name = "slave-node-${count.index + 1}" }
 }
+# ==========================
+# Security Groups   
