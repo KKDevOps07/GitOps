@@ -19,7 +19,7 @@ variable "aws_secret_key" {
 variable "public_key_path" {
   description = "Path to the public key file (.pub) for EC2 instances"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"  # Adjust this path as needed
+  default     = "/home/ubuntu/.ssh/id_rsa.pub"  # Adjust this path as needed
 }
 
 variable "private_key_path" {
