@@ -149,7 +149,7 @@ resource "aws_instance" "master" {
   associate_public_ip_address = true
 
   provisioner "file" {
-    source      = "kube_cluster.sh"
+    source      = "${path.module}/kube_cluster.sh"
     destination = "/home/ubuntu/kube_cluster.sh"
   }
 
@@ -174,7 +174,7 @@ resource "aws_instance" "slave" {
   associate_public_ip_address = true
 
   provisioner "file" {
-    source      = "kube_cluster.sh"
+    source      = "${path.module}/kube_cluster.sh"
     destination = "/home/ubuntu/kube_cluster.sh"
   }
 
@@ -186,7 +186,5 @@ resource "aws_instance" "slave" {
   }
 
   depends_on = [aws_instance.master]
-  tags = { Name = "slave-node-${count.index + 1}" }
+  tags       = { Name = "slave-node-${count.index + 1}" }
 }
-# ==========================
-# Security Groups   

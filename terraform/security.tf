@@ -7,7 +7,7 @@ resource "aws_security_group" "demo" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-   
+
   ingress {
     from_port   = 80
     to_port     = 80
@@ -60,10 +60,10 @@ resource "aws_security_group" "k8s_cluster_sg" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    self            = true
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    self      = true
   }
 
   ingress {
