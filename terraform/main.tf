@@ -3,7 +3,7 @@
 # ==========================
 resource "aws_key_pair" "deployed_key" {
   key_name   = "kkdevops-key-${timestamp()}"       # Unique key name with timestamp
-  public_key = file(var.public_key_path)           # Path to your local public key (.pub)
+  public_key = var.public_key        # Path to your local public key (.pub)
 }
 # ==========================
 # VPC Configuration
@@ -13,7 +13,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "KKDevOps07-vpc"
+    Name = "KKDevOps07-vpc" 
   }
 }
 
@@ -151,7 +151,7 @@ resource "aws_instance" "master" {
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.subnet_a.id
   private_ip                  = "192.168.1.5"
-  key_name                    = var.public_key_path
+  key_name                    = aws_key_pair.deployed_key.key_name
   vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
 
@@ -159,7 +159,7 @@ resource "aws_instance" "master" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file(var.private_key_path)                        # <-- Path to .pem file
+    private_key = var.private_key                      # <-- Path to .pem file
     host        = self.public_ip
   }
 
@@ -185,7 +185,7 @@ resource "aws_instance" "slave" {
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.subnet_b.id
   private_ip                  = "192.168.2.${count.index + 5}"
-  key_name                    = var.public_key_path
+  key_name                    = aws_key_pair.deployed_key.key_name
   vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
   
@@ -193,7 +193,7 @@ resource "aws_instance" "slave" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file(var.private_key_path)                        # <-- Path to .pem file
+    private_key = var.private_key                       # <-- Path to .pem file
     host        = self.public_ip
   }
   
