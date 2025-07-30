@@ -144,6 +144,7 @@ resource "aws_lb_listener" "app_lb_listener" {
 }
 ###EC2 Instances Configuration
 # ==========================    
+# ========================== 
 
 resource "aws_instance" "master" {
   ami                    = var.ami_id
@@ -159,6 +160,7 @@ resource "aws_instance" "master" {
     user        = "ubuntu"
     private_key = file(var.private_key_path)
     host        = self.public_ip
+    timeout     = "2m" # Increased timeout for connection
   }
 
   provisioner "file" {
@@ -191,6 +193,7 @@ resource "aws_instance" "slave" {
     user        = "ubuntu"
     private_key = file(var.private_key_path)
     host        = self.public_ip
+    timeout     = "2m" # Increased timeout for connection
   }
 
   provisioner "file" {

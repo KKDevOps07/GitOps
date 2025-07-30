@@ -21,10 +21,14 @@ pipeline {
                 withCredentials([string(credentialsId: 'kk_private_key', variable: 'PRIVATE_KEY_CONTENT')]) {
                     sh '''
                         echo "$PRIVATE_KEY_CONTENT" | sed 's/\\\\n/\\n/g' > ${WORKSPACE}/kk_private.pem
-                        chmod 600 ${WORKSPACE}/kk_private.pem
+                        chmod 400 ${WORKSPACE}/kk_private.pem
+
+                        # Copy private key into terraform directory (where terraform runs)
+                        cp ${WORKSPACE}/kk_private.pem ${WORKSPACE}/terraform/kk_private.pem
                     '''
                     script {
-                        env.TF_VAR_private_key_path = "${WORKSPACE}/kk_private.pem"
+                        // Set the private_key_path variable to point inside terraform directory
+                        env.TF_VAR_private_key_path = "${WORKSPACE}/terraform/kk_private.pem"
                     }
                 }
             }
@@ -80,5 +84,3 @@ pipeline {
         }
     }
 }
-// Jenkinsfile for Terraform GitOps pipeline
-// This Jenkinsfile defines a pipeline that performs Terraform operations based on user input.
