@@ -142,6 +142,9 @@ resource "aws_lb_listener" "app_lb_listener" {
     target_group_arn = aws_lb_target_group.app_tg.arn
   }
 }
+###EC2 Instances Configuration
+# ==========================    
+
 resource "aws_instance" "master" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
@@ -154,7 +157,7 @@ resource "aws_instance" "master" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = var.private_key_content
+    private_key = file(var.private_key_path)
     host        = self.public_ip
   }
 
@@ -186,7 +189,7 @@ resource "aws_instance" "slave" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = var.private_key_content
+    private_key = file(var.private_key_path)
     host        = self.public_ip
   }
 

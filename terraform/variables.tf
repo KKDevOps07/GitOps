@@ -20,10 +20,9 @@ variable "public_key" {
   type = string
 }
 
-variable "private_key_content" {
-  description = "Private SSH key content"
+variable "private_key_path" {
+  description = "Path to private key file"
   type        = string
-  sensitive   = true
 }
 
 variable "vpc_id" {

@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     parameters {
         choice(
             name: 'ACTION',
@@ -20,8 +19,12 @@ pipeline {
         stage('Prepare SSH Key') {
             steps {
                 withCredentials([string(credentialsId: 'kk_private_key', variable: 'PRIVATE_KEY_CONTENT')]) {
+                    sh '''
+                        echo "$PRIVATE_KEY_CONTENT" | sed 's/\\\\n/\\n/g' > ${WORKSPACE}/kk_private.pem
+                        chmod 600 ${WORKSPACE}/kk_private.pem
+                    '''
                     script {
-                        env.TF_VAR_private_key_content = PRIVATE_KEY_CONTENT
+                        env.TF_VAR_private_key_path = "${WORKSPACE}/kk_private.pem"
                     }
                 }
             }
@@ -30,8 +33,8 @@ pipeline {
         stage('Debug Key') {
             steps {
                 sh '''
-                    echo "Private key first 3 lines:"
-                    echo "$TF_VAR_private_key_content" | head -3
+                    echo "==== First 3 lines of PEM file ===="
+                    head -3 ${TF_VAR_private_key_path}
                 '''
             }
         }
@@ -44,18 +47,14 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                dir('terraform') {
-                    sh 'terraform init'
-                }
+                dir('terraform') { sh 'terraform init' }
             }
         }
 
         stage('Terraform Plan') {
             when { expression { params.ACTION == 'apply' } }
             steps {
-                dir('terraform') {
-                    sh 'terraform plan -out=tfplan'
-                }
+                dir('terraform') { sh 'terraform plan -out=tfplan' }
             }
         }
 
@@ -76,7 +75,10 @@ pipeline {
 
     post {
         always {
+            sh 'rm -f ${WORKSPACE}/kk_private.pem'
             echo "Terraform ${params.ACTION} pipeline complete"
         }
     }
 }
+// Jenkinsfile for Terraform GitOps pipeline
+// This Jenkinsfile defines a pipeline that performs Terraform operations based on user input.
