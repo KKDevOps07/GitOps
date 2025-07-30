@@ -181,7 +181,8 @@ resource "aws_instance" "master" {
 resource "aws_instance" "slave" {
   count                  = 3
   ami                    = var.ami_id
-  instance_type          = "t2.micro"
+  instance_type          = var.instance_type
+  # Using the same AMI ID and instance type as the master node
   subnet_id              = aws_subnet.subnet_b.id
   private_ip             = "192.168.2.${count.index + 5}"
   key_name               = var.private_key
