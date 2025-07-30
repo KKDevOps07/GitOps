@@ -32,6 +32,16 @@ pipeline {
             }
         }
 
+        stage('Debug Key') {
+            steps {
+                sh '''
+                    echo "Checking private key..."
+                    ls -l ${WORKSPACE}/kk_private.pem || echo "Key not found!"
+                    head -3 ${WORKSPACE}/kk_private.pem
+                '''
+            }
+        }
+
         stage('Clone Repository') {
             steps {
                 git credentialsId: 'Githubaccess', url: 'https://github.com/KKDevOps07/GitOps.git', branch: 'master'
@@ -42,22 +52,6 @@ pipeline {
             steps {
                 dir('terraform') {
                     sh 'terraform init'
-                }
-            }
-        }
-
-        stage('Terraform Fmt') {
-            steps {
-                dir('terraform') {
-                    sh 'terraform fmt -recursive || true'
-                }
-            }
-        }
-
-        stage('Terraform Validate') {
-            steps {
-                dir('terraform') {
-                    sh 'terraform validate'
                 }
             }
         }
@@ -88,7 +82,7 @@ pipeline {
 
     post {
         always {
-            sh 'rm -f ${WORKSPACE}/kk_private.pem'  // cleanup private key
+            sh 'rm -f ${WORKSPACE}/kk_private.pem'
             echo "Terraform ${params.ACTION} pipeline complete"
         }
     }
