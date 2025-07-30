@@ -1,10 +1,10 @@
 # ==========================
 # Key Pair (Auto-created)
 # ==========================
-resource "aws_key_pair" "deployed_key" {
-  key_name   = "kkdevops-key-${timestamp()}"       # Unique key name with timestamp
-  public_key = var.public_key        # Path to your local public key (.pub)
-}
+# resource "aws_key_pair" "deployed_key" {
+#   key_name   = "kkdevops-key-${timestamp()}"       # Unique key name with timestamp
+#   public_key = var.public_key        # Path to your local public key (.pub)
+# }
 # ==========================
 # VPC Configuration
 # ==========================
@@ -151,7 +151,7 @@ resource "aws_instance" "master" {
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.subnet_a.id
   private_ip             = "192.168.1.5"
-  key_name               = aws_key_pair.deployed_key.key_name
+  key_name               = var.private_key
   vpc_security_group_ids = [aws_security_group.demo.id]
   associate_public_ip_address = true
 
@@ -184,7 +184,7 @@ resource "aws_instance" "slave" {
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.subnet_b.id
   private_ip             = "192.168.2.${count.index + 5}"
-  key_name               = aws_key_pair.deployed_key.key_name
+  key_name               = var.private_key
   vpc_security_group_ids = [aws_security_group.demo.id]
   associate_public_ip_address = true
 

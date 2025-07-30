@@ -20,10 +20,11 @@ variable "public_key" {
   type = string
 }
 
-# variable "private_key_path" {
-#   description = "Path to private key file"
-#   type        = string
-# }
+variable "private_key" {
+  description = "Path to private key file"
+  type        = string
+  default = "kk1"  # Default private key file name
+}
 
 variable "vpc_id" {
   description = "CIDR block for the VPC"
