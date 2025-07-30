@@ -10,15 +10,28 @@ pipeline {
     }
 
     environment {
-    TF_IN_AUTOMATION       = "true"
-    TF_VAR_aws_access_key  = credentials('aws_access_key')    
-    TF_VAR_aws_secret_key  = credentials('aws_secret_key')    
-    TF_VAR_public_key      = credentials('kk_public_key')
-    TF_VAR_private_key     = credentials('kk_private_key')
-    AWS_DEFAULT_REGION     = "us-east-1"
-}
+        TF_IN_AUTOMATION       = "true"
+        TF_VAR_aws_access_key  = credentials('aws_access_key')
+        TF_VAR_aws_secret_key  = credentials('aws_secret_key')
+        TF_VAR_public_key      = credentials('kk_public_key')
+        AWS_DEFAULT_REGION     = "us-east-1"
+    }
 
     stages {
+        stage('Prepare SSH Key') {
+            steps {
+                withCredentials([string(credentialsId: 'kk_private_key', variable: 'PRIVATE_KEY_CONTENT')]) {
+                    sh '''
+                        echo "$PRIVATE_KEY_CONTENT" > /tmp/kk_private.pem
+                        chmod 600 /tmp/kk_private.pem
+                    '''
+                    script {
+                        env.TF_VAR_private_key_path = "/tmp/kk_private.pem"
+                    }
+                }
+            }
+        }
+
         stage('Clone Repository') {
             steps {
                 git credentialsId: 'Githubaccess', url: 'https://github.com/KKDevOps07/GitOps.git', branch: 'master'
@@ -80,4 +93,4 @@ pipeline {
     }
 }
 // Jenkinsfile for Terraform GitOps Pipeline
-// This Jenkinsfile defines a pipeline for managing Terraform infrastructure as code.
+// This Jenkinsfile automates the Terraform workflow for managing infrastructure as code.

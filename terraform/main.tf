@@ -159,7 +159,7 @@ resource "aws_instance" "master" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file(var.private_key)       # Read private key from file path
+    private_key = file(var.private_key_path)       # Read private key from file path
     host        = self.public_ip
   }
 
@@ -192,7 +192,7 @@ resource "aws_instance" "slave" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file(var.private_key)       # Read private key from file path
+    private_key = file(var.private_key_path)      # Read private key from file path
     host        = self.public_ip
   }
 

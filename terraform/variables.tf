@@ -20,15 +20,9 @@ variable "public_key" {
   type = string
 }
 
-variable "private_key" {
-  description = "Path to the private key file for EC2 instances"
-  type = string
-}
-
 variable "private_key_path" {
-  description = "Name of the key pair to use for EC2 instances"
+  description = "Path to the private key file for SSH connection"
   type        = string
-  default     = "kk1"
 }
 
 variable "vpc_id" {
