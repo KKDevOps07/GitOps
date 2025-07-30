@@ -14,19 +14,14 @@ pipeline {
         TF_VAR_aws_access_key  = credentials('aws_access_key')
         TF_VAR_aws_secret_key  = credentials('aws_secret_key')
         TF_VAR_public_key      = credentials('kk_public_key')
-        AWS_DEFAULT_REGION     = "us-east-1"
     }
 
     stages {
         stage('Prepare SSH Key') {
             steps {
                 withCredentials([string(credentialsId: 'kk_private_key', variable: 'PRIVATE_KEY_CONTENT')]) {
-                    sh '''
-                        echo "$PRIVATE_KEY_CONTENT" > ${WORKSPACE}/kk_private.pem
-                        chmod 600 ${WORKSPACE}/kk_private.pem
-                    '''
                     script {
-                        env.TF_VAR_private_key_path = "${WORKSPACE}/kk_private.pem"
+                        env.TF_VAR_private_key_content = PRIVATE_KEY_CONTENT
                     }
                 }
             }
@@ -35,9 +30,8 @@ pipeline {
         stage('Debug Key') {
             steps {
                 sh '''
-                    echo "Checking private key..."
-                    ls -l ${WORKSPACE}/kk_private.pem || echo "Key not found!"
-                    head -3 ${WORKSPACE}/kk_private.pem
+                    echo "Private key first 3 lines:"
+                    echo "$TF_VAR_private_key_content" | head -3
                 '''
             }
         }
@@ -82,7 +76,6 @@ pipeline {
 
     post {
         always {
-            sh 'rm -f ${WORKSPACE}/kk_private.pem'
             echo "Terraform ${params.ACTION} pipeline complete"
         }
     }

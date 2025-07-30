@@ -142,24 +142,19 @@ resource "aws_lb_listener" "app_lb_listener" {
     target_group_arn = aws_lb_target_group.app_tg.arn
   }
 }
-
-# ==========================
-# EC2 Instances
-# ==========================
 resource "aws_instance" "master" {
-  ami                         = var.ami_id
-  instance_type               = var.instance_type
-  subnet_id                   = aws_subnet.subnet_a.id
-  private_ip                  = "192.168.1.5"
-  key_name                    = aws_key_pair.deployed_key.key_name
-  vpc_security_group_ids      = [aws_security_group.demo.id]
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.subnet_a.id
+  private_ip             = "192.168.1.5"
+  key_name               = aws_key_pair.deployed_key.key_name
+  vpc_security_group_ids = [aws_security_group.demo.id]
   associate_public_ip_address = true
 
-  # SSH connection for provisioners
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file(var.private_key_path)       # Read private key from file path
+    private_key = var.private_key_content
     host        = self.public_ip
   }
 
@@ -179,20 +174,19 @@ resource "aws_instance" "master" {
 }
 
 resource "aws_instance" "slave" {
-  count                       = 3
-  ami                         = var.ami_id
-  instance_type               = "t2.micro"
-  subnet_id                   = aws_subnet.subnet_b.id
-  private_ip                  = "192.168.2.${count.index + 5}"
-  key_name                    = aws_key_pair.deployed_key.key_name
-  vpc_security_group_ids      = [aws_security_group.demo.id]
+  count                  = 3
+  ami                    = var.ami_id
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.subnet_b.id
+  private_ip             = "192.168.2.${count.index + 5}"
+  key_name               = aws_key_pair.deployed_key.key_name
+  vpc_security_group_ids = [aws_security_group.demo.id]
   associate_public_ip_address = true
 
-  # SSH connection for provisioners
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file(var.private_key_path)      # Read private key from file path
+    private_key = var.private_key_content
     host        = self.public_ip
   }
 
