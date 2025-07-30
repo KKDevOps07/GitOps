@@ -159,16 +159,15 @@ resource "aws_instance" "master" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = var.private_key                      # <-- Path to .pem file
+    private_key = file(var.private_key)       # Read private key from file path
     host        = self.public_ip
   }
 
-  
   provisioner "file" {
     source      = "${path.module}/kube_cluster.sh"
     destination = "/home/ubuntu/kube_cluster.sh"
   }
-  
+
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/ubuntu/kube_cluster.sh",
@@ -188,15 +187,15 @@ resource "aws_instance" "slave" {
   key_name                    = aws_key_pair.deployed_key.key_name
   vpc_security_group_ids      = [aws_security_group.demo.id]
   associate_public_ip_address = true
-  
+
   # SSH connection for provisioners
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = var.private_key                       # <-- Path to .pem file
+    private_key = file(var.private_key)       # Read private key from file path
     host        = self.public_ip
   }
-  
+
   provisioner "file" {
     source      = "${path.module}/kube_cluster.sh"
     destination = "/home/ubuntu/kube_cluster.sh"

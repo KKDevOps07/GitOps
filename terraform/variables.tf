@@ -21,6 +21,7 @@ variable "public_key" {
 }
 
 variable "private_key" {
+  description = "Path to the private key file for EC2 instances"
   type = string
 }
 
