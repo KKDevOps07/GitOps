@@ -16,33 +16,6 @@ pipeline {
     }
 
     stages {
-        stage('Prepare SSH Key') {
-            steps {
-                withCredentials([string(credentialsId: 'kk_private_key', variable: 'PRIVATE_KEY_CONTENT')]) {
-                    sh '''
-                        echo "$PRIVATE_KEY_CONTENT" | sed 's/\\\\n/\\n/g' > ${WORKSPACE}/kk_private.pem
-                        chmod 400 ${WORKSPACE}/kk_private.pem
-
-                        # Copy private key into terraform directory (where terraform runs)
-                        cp ${WORKSPACE}/kk_private.pem ${WORKSPACE}/terraform/kk_private.pem
-                    '''
-                    script {
-                        // Set the private_key_path variable to point inside terraform directory
-                        env.TF_VAR_private_key_path = "${WORKSPACE}/terraform/kk_private.pem"
-                    }
-                }
-            }
-        }
-
-        stage('Debug Key') {
-            steps {
-                sh '''
-                    echo "==== First 3 lines of PEM file ===="
-                    head -3 ${TF_VAR_private_key_path}
-                '''
-            }
-        }
-
         stage('Clone Repository') {
             steps {
                 git credentialsId: 'Githubaccess', url: 'https://github.com/KKDevOps07/GitOps.git', branch: 'master'
@@ -79,8 +52,9 @@ pipeline {
 
     post {
         always {
-            sh 'rm -f ${WORKSPACE}/kk_private.pem'
             echo "Terraform ${params.ACTION} pipeline complete"
         }
     }
 }
+// Jenkinsfile for Terraform GitOps Pipeline
+// This Jenkinsfile defines a pipeline for managing Terraform infrastructure using GitOps principles.

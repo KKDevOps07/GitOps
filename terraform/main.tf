@@ -155,25 +155,25 @@ resource "aws_instance" "master" {
   vpc_security_group_ids = [aws_security_group.demo.id]
   associate_public_ip_address = true
 
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file(var.private_key_path)
-    host        = self.public_ip
-    timeout     = "2m" # Increased timeout for connection
-  }
+  # connection {
+  #   type        = "ssh"
+  #   user        = "ubuntu"
+  #   private_key = file(var.private_key_path)
+  #   host        = self.public_ip
+  #   timeout     = "2m" # Increased timeout for connection
+  # }
 
-  provisioner "file" {
-    source      = "${path.module}/kube_cluster.sh"
-    destination = "/home/ubuntu/kube_cluster.sh"
-  }
+  # provisioner "file" {
+  #   source      = "${path.module}/kube_cluster.sh"
+  #   destination = "/home/ubuntu/kube_cluster.sh"
+   # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /home/ubuntu/kube_cluster.sh",
-      "sudo MASTER_PRIVATE_IP=192.168.1.5 bash /home/ubuntu/kube_cluster.sh"
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /home/ubuntu/kube_cluster.sh",
+  #     "sudo MASTER_PRIVATE_IP=192.168.1.5 bash /home/ubuntu/kube_cluster.sh"
+  #   ]
+  # }
 
   tags = { Name = "master-node" }
 }
@@ -188,25 +188,25 @@ resource "aws_instance" "slave" {
   vpc_security_group_ids = [aws_security_group.demo.id]
   associate_public_ip_address = true
 
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file(var.private_key_path)
-    host        = self.public_ip
-    timeout     = "2m" # Increased timeout for connection
-  }
+  # connection {
+  #   type        = "ssh"
+  #   user        = "ubuntu"
+  #   private_key = file(var.private_key_path)
+  #   host        = self.public_ip
+  #   timeout     = "2m" # Increased timeout for connection
+  # }
 
-  provisioner "file" {
-    source      = "${path.module}/kube_cluster.sh"
-    destination = "/home/ubuntu/kube_cluster.sh"
-  }
+  # provisioner "file" {
+  #   source      = "${path.module}/kube_cluster.sh"
+  #   destination = "/home/ubuntu/kube_cluster.sh"
+  # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /home/ubuntu/kube_cluster.sh",
-      "sudo MASTER_PRIVATE_IP=192.168.1.5 bash /home/ubuntu/kube_cluster.sh"
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /home/ubuntu/kube_cluster.sh",
+  #     "sudo MASTER_PRIVATE_IP=192.168.1.5 bash /home/ubuntu/kube_cluster.sh"
+  #   ]
+  # }
 
   depends_on = [aws_instance.master]
   tags       = { Name = "slave-node-${count.index + 1}" }
