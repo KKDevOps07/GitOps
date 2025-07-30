@@ -22,11 +22,11 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'kk_private_key', variable: 'PRIVATE_KEY_CONTENT')]) {
                     sh '''
-                        echo "$PRIVATE_KEY_CONTENT" > /tmp/kk_private.pem
-                        chmod 600 /tmp/kk_private.pem
+                        echo "$PRIVATE_KEY_CONTENT" > ${WORKSPACE}/kk_private.pem
+                        chmod 600 ${WORKSPACE}/kk_private.pem
                     '''
                     script {
-                        env.TF_VAR_private_key_path = "/tmp/kk_private.pem"
+                        env.TF_VAR_private_key_path = "${WORKSPACE}/kk_private.pem"
                     }
                 }
             }
@@ -88,9 +88,8 @@ pipeline {
 
     post {
         always {
+            sh 'rm -f ${WORKSPACE}/kk_private.pem'  // cleanup private key
             echo "Terraform ${params.ACTION} pipeline complete"
         }
     }
 }
-// Jenkinsfile for Terraform GitOps Pipeline
-// This Jenkinsfile automates the Terraform workflow for managing infrastructure as code.
