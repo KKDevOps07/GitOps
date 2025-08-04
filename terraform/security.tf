@@ -9,6 +9,14 @@ resource "aws_security_group" "demo" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
   # HTTPS
   ingress {
     from_port   = 443
@@ -57,7 +65,7 @@ resource "aws_security_group" "demo" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # etcd server client API (master and worker)
+  # etcd server client API
   ingress {
     from_port   = 2379
     to_port     = 2380
@@ -80,9 +88,18 @@ resource "aws_security_group" "demo" {
 resource "aws_security_group" "alb_sg" {
   vpc_id = aws_vpc.main.id
 
+  # HTTP
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -148,6 +165,14 @@ resource "aws_security_group" "redis_sg" {
     cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
+  # SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -163,6 +188,7 @@ resource "aws_security_group" "redis_sg" {
 resource "aws_security_group" "jenkins_sg" {
   vpc_id = aws_vpc.main.id
 
+  # Jenkins UI
   ingress {
     from_port   = 8080
     to_port     = 8080
@@ -170,6 +196,7 @@ resource "aws_security_group" "jenkins_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # SSH
   ingress {
     from_port   = 22
     to_port     = 22
