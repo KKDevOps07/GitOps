@@ -1,0 +1,12 @@
+# Terraform sensitive and state files
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+.terraform.lock.hcl
+
+# Sensitive credentials
+*.pem
+
+# Archives and binaries
+*.tar.gz
