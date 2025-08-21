@@ -39,7 +39,7 @@ phases:
       - cd Terra-AWS
       - echo "Running Terraform commands..."
       - terraform init -input=false -upgrade
-      - terraform fmt -check
+      - terraform fmt -recursive
       - terraform validate
       - |
         if [ "$ACTION" == "plan" ]; then
