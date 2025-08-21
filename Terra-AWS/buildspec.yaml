@@ -5,33 +5,34 @@ env:
     TF_INPUT: "false"
     TF_IN_AUTOMATION: "true"
     ACTION: "plan"  # default action; override in CodePipeline/CodeBuild
-
-parameter-store:
-  GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh_private_key"
-  AWS_ACCESS_KEY_ID: "/GitOps/aws_access_key_id"
-  AWS_SECRET_ACCESS_KEY: "/GitOps/aws_secret_access_key"
-  AWS_DEFAULT_REGION: "/GitOps/aws_region"
+  parameter-store:
+    GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh_private_key"
+    AWS_ACCESS_KEY_ID: "/GitOps/aws_access_key_id"
+    AWS_SECRET_ACCESS_KEY: "/GitOps/aws_secret_access_key"
+    AWS_DEFAULT_REGION: "/GitOps/aws_region"
 
 phases:
   install:
     commands:
       - echo "Checking if Terraform is installed..."
       - |
-          if ! command -v terraform &> /dev/null; then
-            echo "Terraform not found. Installing...";
-            T_VERSION=1.9.5;
-            curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/${T_VERSION}/terraform_${T_VERSION}_linux_amd64.zip;
-            unzip terraform.zip -d /usr/local/bin && rm terraform.zip;
-          else
-            echo "Terraform already installed: $(terraform -version)";
-          fi
+        if ! command -v terraform &> /dev/null; then
+          echo "Terraform not found. Installing..."
+          T_VERSION=1.9.5
+          curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/${T_VERSION}/terraform_${T_VERSION}_linux_amd64.zip
+          unzip terraform.zip -d /usr/local/bin && rm terraform.zip
+        else
+          echo "Terraform already installed: $(terraform -version)"
+        fi
+
   pre_build:
     commands:
-      - echo "Setting up SSH key from Secrets Manager..."
+      - echo "Setting up SSH key from Parameter Store..."
       - mkdir -p /root/.ssh
       - echo "$GITOPS_SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
       - chmod 600 /root/.ssh/id_rsa
       - printf "Host *\n  StrictHostKeyChecking no\n" > /root/.ssh/config
+
   build:
     commands:
       - echo "Running Terraform commands in current directory..."
