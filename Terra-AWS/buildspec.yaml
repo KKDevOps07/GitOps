@@ -1,15 +1,15 @@
 version: 0.2
 
 env:
-  variables:
-    TF_INPUT: "false"
-    TF_IN_AUTOMATION: "true"
-    ACTION: "plan"  # default action; override in CodePipeline/CodeBuild
   parameter-store:
-    GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh"
+    GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh_private_key"
     AWS_ACCESS_KEY_ID: "/GitOps/aws_access_key_id"
     AWS_SECRET_ACCESS_KEY: "/GitOps/aws_secret_access_key"
     AWS_DEFAULT_REGION: "/GitOps/aws_region"
+  variables:
+    TF_INPUT: "false"
+    TF_IN_AUTOMATION: "true"
+    ACTION: "plan"  # default action; override in CodeBuild/CodePipeline
 
 phases:
   install:
@@ -33,27 +33,31 @@ phases:
       - chmod 600 /root/.ssh/id_rsa
       - printf "Host *\n  StrictHostKeyChecking no\n" > /root/.ssh/config
 
-build:
-  commands:
-    - echo "Running Terraform commands in Terra-AWS directory..."
-    - cd Terra-AWS
-    - terraform init -input=false -upgrade
-    - terraform fmt -check
-    - terraform validate
-    - |
-      if [ "$ACTION" == "plan" ]; then
-        terraform plan -input=false -out=tfplan.binary
-      elif [ "$ACTION" == "apply" ]; then
-        terraform apply -input=false -auto-approve tfplan.binary || terraform apply -input=false -auto-approve
-      elif [ "$ACTION" == "destroy" ]; then
-        terraform destroy -input=false -auto-approve
-      else
-        echo "ERROR: ACTION must be one of [plan|apply|destroy]"
-        exit 1
-      fi
+  build:
+    commands:
+      - echo "Changing directory to Terra-AWS..."
+      - cd Terra-AWS
+      - echo "Running Terraform commands..."
+      - terraform init -input=false -upgrade
+      - terraform fmt -check
+      - terraform validate
+      - |
+        if [ "$ACTION" == "plan" ]; then
+          echo ">>> Running terraform plan"
+          terraform plan -input=false -out=tfplan.binary
+        elif [ "$ACTION" == "apply" ]; then
+          echo ">>> Running terraform apply"
+          terraform apply -input=false -auto-approve tfplan.binary || terraform apply -input=false -auto-approve
+        elif [ "$ACTION" == "destroy" ]; then
+          echo ">>> Running terraform destroy"
+          terraform destroy -input=false -auto-approve
+        else
+          echo ">>> ERROR: ACTION must be one of [plan|apply|destroy]"
+          exit 1
+        fi
 
 artifacts:
   files:
-    - tfplan.binary
-    - .terraform.lock.hcl
+    - Terra-AWS/tfplan.binary
+    - Terra-AWS/.terraform.lock.hcl
   discard-paths: no
