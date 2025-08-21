@@ -5,13 +5,11 @@ env:
     TF_INPUT: "false"
     TF_IN_AUTOMATION: "true"
     ACTION: "plan"  # default action; override in CodePipeline/CodeBuild
-  secrets-manager:
-    # Fetch SSH private key from Secrets Manager
-    GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh:ssh_private_key"
-    # Optional AWS keys if needed
-    AWS_ACCESS_KEY_ID: "/GitOps/aws:aws_access_key_id"
-    AWS_SECRET_ACCESS_KEY: "/GitOps/aws:aws_secret_access_key"
-    AWS_DEFAULT_REGION: "/GitOps/aws:aws_region"
+secrets-manager:
+  GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh_private_key"
+  AWS_ACCESS_KEY_ID: "/GitOps/aws_access_key_id"
+  AWS_SECRET_ACCESS_KEY: "/GitOps/aws_secret_access_key"
+  AWS_DEFAULT_REGION: "/GitOps/aws_region"
 
 phases:
   install:
