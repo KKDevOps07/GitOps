@@ -33,26 +33,24 @@ phases:
       - chmod 600 /root/.ssh/id_rsa
       - printf "Host *\n  StrictHostKeyChecking no\n" > /root/.ssh/config
 
-  build:
-    commands:
-      - echo "Running Terraform commands in current directory..."
-      - terraform init -input=false -upgrade
-      - terraform fmt -check
-      - terraform validate
-      - |
-        if [ "$ACTION" == "plan" ]; then
-          echo ">>> Running terraform plan"
-          terraform plan -input=false -out=tfplan.binary
-        elif [ "$ACTION" == "apply" ]; then
-          echo ">>> Running terraform apply"
-          terraform apply -input=false -auto-approve tfplan.binary || terraform apply -input=false -auto-approve
-        elif [ "$ACTION" == "destroy" ]; then
-          echo ">>> Running terraform destroy"
-          terraform destroy -input=false -auto-approve
-        else
-          echo ">>> ERROR: ACTION must be one of [plan|apply|destroy]"
-          exit 1
-        fi
+build:
+  commands:
+    - echo "Running Terraform commands in Terra-AWS directory..."
+    - cd Terra-AWS
+    - terraform init -input=false -upgrade
+    - terraform fmt -check
+    - terraform validate
+    - |
+      if [ "$ACTION" == "plan" ]; then
+        terraform plan -input=false -out=tfplan.binary
+      elif [ "$ACTION" == "apply" ]; then
+        terraform apply -input=false -auto-approve tfplan.binary || terraform apply -input=false -auto-approve
+      elif [ "$ACTION" == "destroy" ]; then
+        terraform destroy -input=false -auto-approve
+      else
+        echo "ERROR: ACTION must be one of [plan|apply|destroy]"
+        exit 1
+      fi
 
 artifacts:
   files:
