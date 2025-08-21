@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   parameter-store:
-    GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh_private_key"
+    GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh"
     AWS_ACCESS_KEY_ID: "/GitOps/aws_access_key_id"
     AWS_SECRET_ACCESS_KEY: "/GitOps/aws_secret_access_key"
     AWS_DEFAULT_REGION: "/GitOps/aws_region"
