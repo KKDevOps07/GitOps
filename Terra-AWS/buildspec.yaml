@@ -1,0 +1,61 @@
+version: 0.2
+
+env:
+  variables:
+    TF_INPUT: "false"
+    TF_IN_AUTOMATION: "true"
+    ACTION: "plan"  # default action; override in CodePipeline/CodeBuild
+  secrets-manager:
+    # Fetch SSH private key from Secrets Manager
+    GITOPS_SSH_PRIVATE_KEY: "/GitOps/ssh:ssh_private_key"
+    # Optional AWS keys if needed
+    AWS_ACCESS_KEY_ID: "/GitOps/aws:aws_access_key_id"
+    AWS_SECRET_ACCESS_KEY: "/GitOps/aws:aws_secret_access_key"
+    AWS_DEFAULT_REGION: "/GitOps/aws:aws_region"
+
+phases:
+  install:
+    commands:
+      - echo "Checking if Terraform is installed..."
+      - |
+          if ! command -v terraform &> /dev/null; then
+            echo "Terraform not found. Installing...";
+            T_VERSION=1.9.5;
+            curl -sSLo terraform.zip https://releases.hashicorp.com/terraform/${T_VERSION}/terraform_${T_VERSION}_linux_amd64.zip;
+            unzip terraform.zip -d /usr/local/bin && rm terraform.zip;
+          else
+            echo "Terraform already installed: $(terraform -version)";
+          fi
+  pre_build:
+    commands:
+      - echo "Setting up SSH key from Secrets Manager..."
+      - mkdir -p /root/.ssh
+      - echo "$GITOPS_SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
+      - chmod 600 /root/.ssh/id_rsa
+      - printf "Host *\n  StrictHostKeyChecking no\n" > /root/.ssh/config
+  build:
+    commands:
+      - echo "Running Terraform commands in current directory..."
+      - terraform init -input=false -upgrade
+      - terraform fmt -check
+      - terraform validate
+      - |
+        if [ "$ACTION" == "plan" ]; then
+          echo ">>> Running terraform plan"
+          terraform plan -input=false -out=tfplan.binary
+        elif [ "$ACTION" == "apply" ]; then
+          echo ">>> Running terraform apply"
+          terraform apply -input=false -auto-approve tfplan.binary || terraform apply -input=false -auto-approve
+        elif [ "$ACTION" == "destroy" ]; then
+          echo ">>> Running terraform destroy"
+          terraform destroy -input=false -auto-approve
+        else
+          echo ">>> ERROR: ACTION must be one of [plan|apply|destroy]"
+          exit 1
+        fi
+
+artifacts:
+  files:
+    - tfplan.binary
+    - .terraform.lock.hcl
+  discard-paths: no
